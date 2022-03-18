@@ -2,7 +2,7 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-# Site Live Preview
+# Live Preview
 
 https://vigilant-lichterman-fc722a.netlify.app/
 
