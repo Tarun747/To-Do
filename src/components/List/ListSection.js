@@ -78,7 +78,7 @@ const ListSection = () => {
     let taskId
 
     list.map((item) => {
-      item.subTasks
+      return item.subTasks
         .map((e) => {
           taskId = item.id
           return e.id
