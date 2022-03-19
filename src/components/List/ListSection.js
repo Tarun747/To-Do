@@ -5,7 +5,6 @@ import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Stack from '@mui/material/Stack'
 import classes from './ListSection.module.scss'
-import AddIcon from '@mui/icons-material/Add'
 import TextField from '@mui/material/TextField'
 import Drawer from '@mui/material/Drawer'
 import Button from '@mui/material/Button'
@@ -20,6 +19,7 @@ const ListSection = () => {
   const [subTask, setSubTask] = useState('')
   const [drawer, setDrawer] = useState(false)
   const [list, setList] = useState([])
+
   const handleNewTask = () => {
     if (task !== '') {
       const updateTaskArray = list
@@ -49,6 +49,7 @@ const ListSection = () => {
         .indexOf(taskRequested)
 
       updatedTask[index].subTasks.push({
+        completed: false,
         id: Math.floor(Math.random() * (999 - 100 + 1) + 100),
         task: subTask,
       })
@@ -73,7 +74,6 @@ const ListSection = () => {
   }
 
   const removeSubTask = (taskRequested) => {
-    debugger
     let taskList = [...list]
     let taskId
 
@@ -96,10 +96,6 @@ const ListSection = () => {
         return e.id
       })
       .indexOf(taskRequested)
-    // .map((e) => {
-    //   return e.id
-    // })
-    // .indexOf(taskRequested)
 
     if (removeIndex > -1) {
       taskList[indexOfMainTask].subTasks.splice(removeIndex, 1)
@@ -107,25 +103,81 @@ const ListSection = () => {
     setList(taskList)
   }
 
+  const taskCompleted = (taskRequested) => {
+    let taskList = [...list]
+    let updateTask = list
+      .map((e) => {
+        return e.id
+      })
+      .indexOf(taskRequested)
+    taskList[updateTask].completed = !taskList[updateTask].completed
+    setList(taskList)
+  }
+
+  const subTaskCompleted = (taskRequested) => {
+    let taskList = [...list]
+    let taskId
+
+    list.map((item) => {
+      return item.subTasks
+        .map((e) => {
+          taskId = item.id
+          return e.id
+        })
+        .indexOf(taskRequested)
+    })
+    let indexOfMainTask = taskList
+      .map((e) => {
+        return e.id
+      })
+      .indexOf(taskId)
+
+    let indexOfSubTask = taskList[indexOfMainTask].subTasks
+      .map((e) => {
+        return e.id
+      })
+      .indexOf(taskRequested)
+
+    taskList[indexOfMainTask].subTasks[indexOfSubTask].completed =
+      !taskList[indexOfMainTask].subTasks[indexOfSubTask].completed
+    setList(taskList)
+  }
+
+  const completedSubTask = (subTask) => {
+    let count = 0
+    subTask.map((item) => {
+      if (item.completed) {
+        count++
+      }
+    })
+    return count
+  }
+
   return (
     <>
       <div className={classes.container}>
+        <div className={classes.section}>
+          <Typography align="center" variant="h3" component="h3">
+            ToDo App
+          </Typography>
+        </div>
         <div className={classes.section}>
           <Stack spacing={2} direction="row">
             <TextField
               fullWidth={true}
               id="listInput"
-              label="What you like to add"
+              label="What to do ?"
               variant="outlined"
               value={task}
               onChange={(e) => setTask(e.target.value)}
             />
             <Button
+              size="small"
+              disableElevation={true}
               onClick={() => handleNewTask()}
               variant="contained"
-              endIcon={<AddIcon />}
             >
-              Add
+              New List
             </Button>
           </Stack>
         </div>
@@ -137,7 +189,7 @@ const ListSection = () => {
                   <Grid item xs={1}>
                     <Checkbox
                       checked={item.completed}
-                      // onChange={handleChange}
+                      onChange={() => taskCompleted(item.id)}
                     />
                   </Grid>
                   <Grid item xs={9} sx={{ pl: 1, pr: 1 }}>
@@ -147,6 +199,10 @@ const ListSection = () => {
                       component="h6"
                     >
                       {item.task}
+                    </Typography>
+                    <Typography align="right" variant="p" component="p">
+                      {completedSubTask(item.subTasks)} of{' '}
+                      {item.subTasks.length} completed
                     </Typography>
                   </Grid>
                   <Grid item xs={1}>
@@ -172,8 +228,20 @@ const ListSection = () => {
                   ? item.subTasks.map((item) => (
                       <ListItem>
                         <Grid container>
-                          <Grid item xs={11}>
-                            <Typography variant="h6" component="h5">
+                          <Grid item xs={1}>
+                            <Checkbox
+                              checked={item.completed}
+                              onChange={() => subTaskCompleted(item.id)}
+                            />
+                          </Grid>
+                          <Grid item xs={10}>
+                            <Typography
+                              className={
+                                item.completed ? classes.strikeOff : null
+                              }
+                              variant="h6"
+                              component="h5"
+                            >
                               {item.task}
                             </Typography>
                           </Grid>
@@ -201,7 +269,7 @@ const ListSection = () => {
               <TextField
                 fullWidth={true}
                 id="subListInput"
-                label="What you like to add"
+                label="What are the steps ?"
                 variant="outlined"
                 value={subTask}
                 onChange={(e) => setSubTask(e.target.value)}
@@ -209,9 +277,10 @@ const ListSection = () => {
               <Button
                 onClick={() => addSubTask()}
                 variant="contained"
-                endIcon={<AddIcon />}
+                size="small"
+                disableElevation
               >
-                Add
+                New Step
               </Button>
             </Stack>
           </div>
