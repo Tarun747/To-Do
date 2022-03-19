@@ -140,7 +140,7 @@ const ListSection = () => {
                       // onChange={handleChange}
                     />
                   </Grid>
-                  <Grid item xs={9}>
+                  <Grid item xs={9} sx={{ pl: 1, pr: 1 }}>
                     <Typography
                       className={item.completed ? classes.strikeOff : null}
                       variant="h4"
