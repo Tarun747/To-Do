@@ -149,6 +149,7 @@ const ListSection = () => {
       if (item.completed) {
         count++
       }
+      return count
     })
     return count
   }
