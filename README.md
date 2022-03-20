@@ -4,7 +4,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Live Preview
 
-https://bit.ly/3Niap7h
+https://vigilant-lichterman-fc722a.netlify.app/
 
 ## Available Scripts
 
