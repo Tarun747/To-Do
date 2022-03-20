@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Grid from '@mui/material/Grid'
+import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -12,6 +13,7 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import Checkbox from '@mui/material/Checkbox'
+import axios from 'axios'
 
 const ListSection = () => {
   const [taskId, setTaskId] = useState()
@@ -19,6 +21,36 @@ const ListSection = () => {
   const [subTask, setSubTask] = useState('')
   const [drawer, setDrawer] = useState(false)
   const [list, setList] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  // Check for Data
+  useEffect(() => {
+    setLoading(true)
+    axios
+      .get(`${process.env.REACT_APP_URI}/api/`)
+      .then((res) => {
+        setList(res.data.data[0].data)
+        console.log(res)
+        setLoading(false)
+      })
+      .catch((err) => {
+        setLoading(false)
+        console.log(err)
+      })
+  }, [])
+
+  useEffect(() => {
+    axios
+      .post(`${process.env.REACT_APP_URI}/api/`, {
+        data: list,
+      })
+      .then((res) => {
+        console.log(res)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [list])
 
   const handleNewTask = () => {
     if (task !== '') {
@@ -162,106 +194,115 @@ const ListSection = () => {
             ToDo App
           </Typography>
         </div>
-        <div className={classes.section}>
-          <Stack spacing={2} direction="row">
-            <TextField
-              fullWidth={true}
-              id="listInput"
-              label="What to do ?"
-              variant="outlined"
-              value={task}
-              onChange={(e) => setTask(e.target.value)}
-            />
-            <Button
-              size="small"
-              disableElevation={true}
-              onClick={() => handleNewTask()}
-              variant="contained"
-            >
-              New List
-            </Button>
-          </Stack>
-        </div>
-        <div className={classes.section}>
-          {list.map((item) => (
-            <List>
-              <ListItem disablePadding>
-                <Grid container>
-                  <Grid item xs={1}>
-                    <Checkbox
-                      checked={item.completed}
-                      onChange={() => taskCompleted(item.id)}
-                    />
-                  </Grid>
-                  <Grid item xs={9} sx={{ pl: 1, pr: 1 }}>
-                    <Typography
-                      className={item.completed ? classes.strikeOff : null}
-                      variant="h4"
-                      component="h6"
-                    >
-                      {item.task}
-                    </Typography>
-                    <Typography align="right" variant="p" component="p">
-                      {completedSubTask(item.subTasks)} of{' '}
-                      {item.subTasks.length} completed
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={1}>
-                    <IconButton
-                      onClick={() => removeTask(item.id)}
-                      aria-label="delete"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid>
-                  <Grid item xs={1}>
-                    <IconButton
-                      onClick={() => openDrawer(item.id)}
-                      aria-label="delete"
-                    >
-                      <AddCircleOutlineIcon />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </ListItem>
-              <List sx={{ pl: 4, pr: 4 }}>
-                {item.subTasks.length > 0
-                  ? item.subTasks.map((item) => (
-                      <ListItem>
-                        <Grid container>
-                          <Grid item xs={1}>
-                            <Checkbox
-                              checked={item.completed}
-                              onChange={() => subTaskCompleted(item.id)}
-                            />
-                          </Grid>
-                          <Grid item xs={10}>
-                            <Typography
-                              className={
-                                item.completed ? classes.strikeOff : null
-                              }
-                              variant="h6"
-                              component="h5"
-                            >
-                              {item.task}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={1}>
-                            <IconButton
-                              onClick={() => removeSubTask(item.id)}
-                              aria-label="delete"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Grid>
-                        </Grid>
-                      </ListItem>
-                    ))
-                  : null}
-              </List>
-            </List>
-          ))}
-        </div>
+        {loading ? (
+          <div className={classes.circularProgress}>
+            <CircularProgress />
+          </div>
+        ) : (
+          <>
+            {' '}
+            <div className={classes.section}>
+              <Stack spacing={2} direction="row">
+                <TextField
+                  fullWidth={true}
+                  id="listInput"
+                  label="What to do ?"
+                  variant="outlined"
+                  value={task}
+                  onChange={(e) => setTask(e.target.value)}
+                />
+                <Button
+                  size="small"
+                  disableElevation={true}
+                  onClick={() => handleNewTask()}
+                  variant="contained"
+                >
+                  New List
+                </Button>
+              </Stack>
+            </div>
+            <div className={classes.section}>
+              {list.map((item) => (
+                <List>
+                  <ListItem disablePadding>
+                    <Grid container>
+                      <Grid item xs={1}>
+                        <Checkbox
+                          checked={item.completed}
+                          onChange={() => taskCompleted(item.id)}
+                        />
+                      </Grid>
+                      <Grid item xs={9} sx={{ pl: 1, pr: 1 }}>
+                        <Typography
+                          className={item.completed ? classes.strikeOff : null}
+                          variant="h4"
+                          component="h6"
+                        >
+                          {item.task}
+                        </Typography>
+                        <Typography align="right" variant="p" component="p">
+                          {completedSubTask(item.subTasks)} of{' '}
+                          {item.subTasks.length} completed
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={1}>
+                        <IconButton
+                          onClick={() => removeTask(item.id)}
+                          aria-label="delete"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Grid>
+                      <Grid item xs={1}>
+                        <IconButton
+                          onClick={() => openDrawer(item.id)}
+                          aria-label="delete"
+                        >
+                          <AddCircleOutlineIcon />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </ListItem>
+                  <List sx={{ pl: 4, pr: 4 }}>
+                    {item.subTasks.length > 0
+                      ? item.subTasks.map((item) => (
+                          <ListItem>
+                            <Grid container>
+                              <Grid item xs={1}>
+                                <Checkbox
+                                  checked={item.completed}
+                                  onChange={() => subTaskCompleted(item.id)}
+                                />
+                              </Grid>
+                              <Grid item xs={10}>
+                                <Typography
+                                  className={
+                                    item.completed ? classes.strikeOff : null
+                                  }
+                                  variant="h6"
+                                  component="h5"
+                                >
+                                  {item.task}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={1}>
+                                <IconButton
+                                  onClick={() => removeSubTask(item.id)}
+                                  aria-label="delete"
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Grid>
+                            </Grid>
+                          </ListItem>
+                        ))
+                      : null}
+                  </List>
+                </List>
+              ))}
+            </div>
+          </>
+        )}
       </div>
       <Drawer anchor="bottom" open={drawer} onClose={() => setDrawer(!drawer)}>
         <div className={classes.drawerContainer}>
